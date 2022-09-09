@@ -32,7 +32,9 @@
   "scripts": {
     "build": "rollup -c",
     "build-watch": "rollup -c -w",
-    "dev": "npm-run-all --parallel build-watch"
+    "dev": "npm-run-all --parallel build-watch",
+    "prepublishOnly": "npm run build",
+    "prepare": "npm run build"
   },
   "devDependencies": {
     "@babel/cli": "^7.12.10",
@@ -49,7 +51,7 @@
     "tslib": "^2.2.0"
   },
   "peerDependencies": {
-    "react": "^16.8.0 || ^17.0.0"
+    "react": "^16.8.0 || ^17.0.0 || ^18.0.0"
   },
   "eslintConfig": {
     "extends": [

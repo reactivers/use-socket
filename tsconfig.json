@@ -3,9 +3,10 @@
     "allowJs": true,
     "allowSyntheticDefaultImports": true,
     "declaration": true,
+    "baseUrl": "./src",
     "declarationDir": "dist/types",
     "esModuleInterop": true,
-    "outDir": "./dist",
+    "outDir": "dist",
     "jsx": "react-jsx",
     "lib": [
       "es6",

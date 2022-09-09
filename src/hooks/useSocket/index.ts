@@ -1,60 +1,62 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { emptyFunction } from '../../utils/functions';
 import { useSocketContext } from './context';
+import { IConnect, onCloseFunc, onErrorFunc, onMessageFunc, onOpenFunc, SocketProps, SocketResponse, SocketState } from './types';
 
-interface SocketProps {
-    url?: string;
-    wss?: boolean;
-    disconnectOnUnmount?: boolean;
-    onOpen?: (a: any) => void,
-    onClose?: (a: any) => void,
-    onError?: (a: any) => void,
-    onMessage?: (a: any, data: any) => void
+const useSocket: (props?: SocketProps) => SocketResponse = ({ url: propUrl, wss: propWss, disconnectOnUnmount: propDisconnectOnUnmount } = {}) => {
+    const { connect: contextConnect, url: contextUrl, disconnectOnUnmount: contextDisconnectOnUnmount, wss: contextWss } = useSocketContext();
 
-}
-
-interface SocketState {
-    readyState: number;
-    lastData: any;
-}
-
-interface SocketResponse extends SocketState {
-    connect: (params: ({ url: string })) => WebSocket;
-    socket: WebSocket,
-    sendData: (p: any) => void;
-}
-
-const useSocket: (props: SocketProps) => SocketResponse = ({ url, wss = false, disconnectOnUnmount = true, onOpen = emptyFunction, onClose = emptyFunction, onError = emptyFunction, onMessage = emptyFunction }) => {
-    const protocol = wss ? "wss" : "ws";
-    const { connect: connectContext } = useSocketContext();
-
-    //@ts-ignore
-    const socket = useRef<WebSocket>({});
+    const socket = useRef<WebSocket>();
+    const onOpenRef = useRef<onOpenFunc>();
+    const onMessageRef = useRef<onMessageFunc>();
+    const onCloseRef = useRef<onCloseFunc>();
+    const onErrorRef = useRef<onErrorFunc>();
+    const disconnectOnUnmount = useRef<boolean>(propDisconnectOnUnmount || contextDisconnectOnUnmount);
 
     const [socketState, setSocketState] = useState<SocketState>({ readyState: 0, lastData: undefined })
 
-
     useEffect(() => {
         return () => {
-            if (disconnectOnUnmount) {
-                if (socket.current.close) {
-                    socket.current.close(1000, "User disconnected!");
+            if (disconnectOnUnmount.current) {
+                if (socket.current?.close) {
+                    socket.current?.close(1000, "User disconnected!");
                 }
             }
         }
-    }, [disconnectOnUnmount])
+    }, [disconnectOnUnmount.current])
 
-    const connect: (params?: { url: string }) => WebSocket = useCallback(({ url: _url }) => {
-        const path = `${protocol}://${_url || url}`
-        socket.current = connectContext({ path });
-        setSocketState(old => ({ ...old, readyState: socket.current.readyState }))
+    const connect: (params?: IConnect) => WebSocket = useCallback(({
+        disconnectOnUnmount: _disconnectOnUnmount,
+        endpoint,
+        onClose,
+        onError,
+        onMessage,
+        onOpen,
+        url: _url,
+        wss
+    } = {}) => {
+
+        const url = _url || propUrl || contextUrl;
+        const isSecure = wss || propWss || contextWss;
+        const protocol = isSecure ? "wss" : "ws"
+        const path = `${protocol}://${url}${endpoint}`;
+
+        onOpenRef.current = onOpen;
+        onMessageRef.current = onMessage;
+        onCloseRef.current = onClose;
+        onErrorRef.current = onError;
+        disconnectOnUnmount.current = _disconnectOnUnmount || propDisconnectOnUnmount || contextDisconnectOnUnmount;
+
+        socket.current = contextConnect({ path });
+        setSocketState(old => ({ ...old, readyState: socket.current?.readyState }));
+
         return socket.current;
-    }, [connectContext, protocol, url, disconnectOnUnmount])
+    }, [contextConnect, propUrl, contextUrl, propDisconnectOnUnmount, contextDisconnectOnUnmount, propWss, contextWss])
 
     const onopen = useCallback((event) => {
         setSocketState(old => ({ ...old, readyState: WebSocket.OPEN }))
-        onOpen(event)
-    }, [onOpen])
+        if (onOpenRef.current)
+            onOpenRef.current(event)
+    }, [onOpenRef.current])
 
     const onmessage = useCallback((event) => {
         setSocketState(old => ({ ...old, lastData: event.data }))
@@ -64,54 +66,57 @@ const useSocket: (props: SocketProps) => SocketResponse = ({ url, wss = false, d
         } catch (e) {
             //console.error("JSON PARSE error", e)
         }
-        onMessage(event, data)
-    }, [onMessage])
+        if (onMessageRef.current)
+            onMessageRef.current(event, data)
+    }, [onMessageRef.current])
 
     const onclose = useCallback((event) => {
         setSocketState(old => ({ ...old, readyState: WebSocket.CLOSED }))
-        onClose(event)
-    }, [onClose])
+        if (onCloseRef.current)
+            onCloseRef.current(event)
+    }, [onCloseRef.current])
 
     const onerror = useCallback((event) => {
         setSocketState(old => ({ ...old, readyState: WebSocket.CLOSING }))
-        onError(event)
-    }, [onError])
+        if (onErrorRef.current)
+            onErrorRef.current(event)
+    }, [onErrorRef.current])
 
     useEffect(() => {
-        if (socket.current.addEventListener) socket.current.addEventListener('open', onopen)
+        if (socket.current?.addEventListener) socket.current?.addEventListener('open', onopen)
         return () => {
-            if (socket.current.removeEventListener)
-                socket.current.removeEventListener('open', onopen);
+            if (socket.current?.removeEventListener)
+                socket.current?.removeEventListener('open', onopen);
         }
     }, [socket.current, onopen])
 
     useEffect(() => {
-        if (socket.current.addEventListener) socket.current.addEventListener('close', onclose)
+        if (socket.current?.addEventListener) socket.current?.addEventListener('close', onclose)
         return () => {
-            if (socket.current.removeEventListener)
-                socket.current.removeEventListener('close', onclose);
+            if (socket.current?.removeEventListener)
+                socket.current?.removeEventListener('close', onclose);
         }
     }, [socket.current, onclose])
 
     useEffect(() => {
-        if (socket.current.addEventListener) socket.current.addEventListener('message', onmessage)
+        if (socket.current?.addEventListener) socket.current?.addEventListener('message', onmessage)
         return () => {
-            if (socket.current.removeEventListener)
-                socket.current.removeEventListener('message', onmessage);
+            if (socket.current?.removeEventListener)
+                socket.current?.removeEventListener('message', onmessage);
         }
     }, [socket.current, onmessage])
 
     useEffect(() => {
-        if (socket.current.addEventListener) socket.current.addEventListener('error', onerror)
+        if (socket.current?.addEventListener) socket.current?.addEventListener('error', onerror)
         return () => {
-            if (socket.current.removeEventListener)
-                socket.current.removeEventListener('error', onerror);
+            if (socket.current?.removeEventListener)
+                socket.current?.removeEventListener('error', onerror);
         }
     }, [socket.current, onerror])
 
 
     const sendData = useCallback((data) => {
-        socket.current.send(data)
+        socket.current?.send(data)
     }, [socket.current])
 
     return { connect, socket: socket.current, sendData, ...socketState }
