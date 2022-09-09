@@ -1,7 +1,7 @@
 {
   "name": "@reactivers/use-socket",
   "description": "Web Socket Connection manager in React with hook and provider",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "keywords": [
     "hooks",
     "react",
