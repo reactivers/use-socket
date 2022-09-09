@@ -38,7 +38,7 @@ const useSocket: (props?: SocketProps) => SocketResponse = ({ url: propUrl, wss:
         const url = _url || propUrl || contextUrl;
         const isSecure = wss || propWss || contextWss;
         const protocol = isSecure ? "wss" : "ws"
-        const path = `${protocol}://${url}${endpoint}`;
+        const path = `${protocol}://${url}${endpoint || ""}`;
 
         onOpenRef.current = onOpen;
         onMessageRef.current = onMessage;
