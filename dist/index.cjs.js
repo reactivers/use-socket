@@ -31,25 +31,36 @@ var __assign = function() {
     return __assign.apply(this, arguments);
 };
 
+exports.READY_STATE = void 0;
+(function (READY_STATE) {
+    READY_STATE[READY_STATE["CONNECTING"] = 0] = "CONNECTING";
+    READY_STATE[READY_STATE["OPEN"] = 1] = "OPEN";
+    READY_STATE[READY_STATE["CLOSING"] = 2] = "CLOSING";
+    READY_STATE[READY_STATE["CLOSED"] = 3] = "CLOSED";
+})(exports.READY_STATE || (exports.READY_STATE = {}));
+
 var SocketContext = react.createContext({});
 var useSocketContext = function () {
     var context = react.useContext(SocketContext);
     if (context === undefined) {
-        throw new Error('useSocketContext must be used within an SocketContext.Provider');
+        throw new Error("useSocketContext must be used within an SocketContext.Provider");
     }
     return context;
 };
 
-var useSocket = function (_a) {
-    var _b = _a === void 0 ? {} : _a, propUrl = _b.url, propWss = _b.wss, propDisconnectOnUnmount = _b.disconnectOnUnmount;
-    var _c = useSocketContext(), contextConnect = _c.connect, contextUrl = _c.url, contextDisconnectOnUnmount = _c.disconnectOnUnmount, contextWss = _c.wss;
+var useSocket = function (params) {
+    var _a = params || {}, propUrl = _a.url, propWss = _a.wss, propDisconnectOnUnmount = _a.disconnectOnUnmount;
+    var _b = useSocketContext(), contextConnect = _b.connect, contextUrl = _b.url, contextDisconnectOnUnmount = _b.disconnectOnUnmount, contextWss = _b.wss;
     var socket = react.useRef();
     var onOpenRef = react.useRef();
     var onMessageRef = react.useRef();
     var onCloseRef = react.useRef();
     var onErrorRef = react.useRef();
     var disconnectOnUnmount = react.useRef(propDisconnectOnUnmount || contextDisconnectOnUnmount);
-    var _d = react.useState({ readyState: 0, lastData: undefined }), socketState = _d[0], setSocketState = _d[1];
+    var _c = react.useState({
+        readyState: exports.READY_STATE.CLOSED,
+        lastData: undefined,
+    }), socketState = _c[0], setSocketState = _c[1];
     react.useEffect(function () {
         return function () {
             var _a, _b;
@@ -65,16 +76,28 @@ var useSocket = function (_a) {
         var url = _url || propUrl || contextUrl;
         var isSecure = wss || propWss || contextWss;
         var protocol = isSecure ? "wss" : "ws";
-        var path = "".concat(protocol, "://").concat(url).concat(endpoint);
+        var path = "".concat(protocol, "://").concat(url).concat(endpoint || "");
         onOpenRef.current = onOpen;
         onMessageRef.current = onMessage;
         onCloseRef.current = onClose;
         onErrorRef.current = onError;
-        disconnectOnUnmount.current = _disconnectOnUnmount || propDisconnectOnUnmount || contextDisconnectOnUnmount;
-        socket.current = contextConnect({ path: path });
-        setSocketState(function (old) { var _a; return (__assign(__assign({}, old), { readyState: (_a = socket.current) === null || _a === void 0 ? void 0 : _a.readyState })); });
-        return socket.current;
-    }, [contextConnect, propUrl, contextUrl, propDisconnectOnUnmount, contextDisconnectOnUnmount, propWss, contextWss]);
+        disconnectOnUnmount.current =
+            _disconnectOnUnmount ||
+                propDisconnectOnUnmount ||
+                contextDisconnectOnUnmount;
+        var _socket = contextConnect({ path: path });
+        socket.current = _socket;
+        setSocketState(function (old) { return (__assign(__assign({}, old), { readyState: _socket.readyState })); });
+        return _socket;
+    }, [
+        contextConnect,
+        propUrl,
+        contextUrl,
+        propDisconnectOnUnmount,
+        contextDisconnectOnUnmount,
+        propWss,
+        contextWss,
+    ]);
     var onopen = react.useCallback(function (event) {
         setSocketState(function (old) { return (__assign(__assign({}, old), { readyState: WebSocket.OPEN })); });
         if (onOpenRef.current)
@@ -105,41 +128,41 @@ var useSocket = function (_a) {
     react.useEffect(function () {
         var _a, _b;
         if ((_a = socket.current) === null || _a === void 0 ? void 0 : _a.addEventListener)
-            (_b = socket.current) === null || _b === void 0 ? void 0 : _b.addEventListener('open', onopen);
+            (_b = socket.current) === null || _b === void 0 ? void 0 : _b.addEventListener("open", onopen);
         return function () {
             var _a, _b;
             if ((_a = socket.current) === null || _a === void 0 ? void 0 : _a.removeEventListener)
-                (_b = socket.current) === null || _b === void 0 ? void 0 : _b.removeEventListener('open', onopen);
+                (_b = socket.current) === null || _b === void 0 ? void 0 : _b.removeEventListener("open", onopen);
         };
     }, [socket.current, onopen]);
     react.useEffect(function () {
         var _a, _b;
         if ((_a = socket.current) === null || _a === void 0 ? void 0 : _a.addEventListener)
-            (_b = socket.current) === null || _b === void 0 ? void 0 : _b.addEventListener('close', onclose);
+            (_b = socket.current) === null || _b === void 0 ? void 0 : _b.addEventListener("close", onclose);
         return function () {
             var _a, _b;
             if ((_a = socket.current) === null || _a === void 0 ? void 0 : _a.removeEventListener)
-                (_b = socket.current) === null || _b === void 0 ? void 0 : _b.removeEventListener('close', onclose);
+                (_b = socket.current) === null || _b === void 0 ? void 0 : _b.removeEventListener("close", onclose);
         };
     }, [socket.current, onclose]);
     react.useEffect(function () {
         var _a, _b;
         if ((_a = socket.current) === null || _a === void 0 ? void 0 : _a.addEventListener)
-            (_b = socket.current) === null || _b === void 0 ? void 0 : _b.addEventListener('message', onmessage);
+            (_b = socket.current) === null || _b === void 0 ? void 0 : _b.addEventListener("message", onmessage);
         return function () {
             var _a, _b;
             if ((_a = socket.current) === null || _a === void 0 ? void 0 : _a.removeEventListener)
-                (_b = socket.current) === null || _b === void 0 ? void 0 : _b.removeEventListener('message', onmessage);
+                (_b = socket.current) === null || _b === void 0 ? void 0 : _b.removeEventListener("message", onmessage);
         };
     }, [socket.current, onmessage]);
     react.useEffect(function () {
         var _a, _b;
         if ((_a = socket.current) === null || _a === void 0 ? void 0 : _a.addEventListener)
-            (_b = socket.current) === null || _b === void 0 ? void 0 : _b.addEventListener('error', onerror);
+            (_b = socket.current) === null || _b === void 0 ? void 0 : _b.addEventListener("error", onerror);
         return function () {
             var _a, _b;
             if ((_a = socket.current) === null || _a === void 0 ? void 0 : _a.removeEventListener)
-                (_b = socket.current) === null || _b === void 0 ? void 0 : _b.removeEventListener('error', onerror);
+                (_b = socket.current) === null || _b === void 0 ? void 0 : _b.removeEventListener("error", onerror);
         };
     }, [socket.current, onerror]);
     var sendData = react.useCallback(function (data) {
@@ -155,9 +178,10 @@ var SocketProvider = function (_a) {
     var connect = react.useCallback(function (_a) {
         var path = _a.path;
         var socket = sockets.current[path];
-        if (!!socket) {
+        if (socket) {
             var readyState = socket.readyState;
-            if (readyState === WebSocket.OPEN || readyState === WebSocket.CONNECTING)
+            if (readyState === WebSocket.OPEN ||
+                readyState === WebSocket.CONNECTING)
                 return socket;
         }
         var _socket = new WebSocket(path);

@@ -1,0 +1,5 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+echo "commit-msg is working"
+echo "Commit Message: $(cat $1)"
+npx -y commitlint --edit ""

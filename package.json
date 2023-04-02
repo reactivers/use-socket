@@ -1,7 +1,64 @@
 {
   "name": "@reactivers/use-socket",
   "description": "Web Socket Connection manager in React with hook and provider",
-  "version": "1.0.2",
+  "version": "1.0.3",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "main": "dist/index.cjs.js",
+  "types": "dist/types/index.d.ts",
+  "source": "src/index.ts",
+  "scripts": {
+    "build": "rollup -c",
+    "test": "npx -y tsc",
+    "build-watch": "rollup -c -w",
+    "dev": "npm-run-all --parallel build-watch",
+    "format": "npx prettier --write \"src/**/*.{ts,tsx}\"",
+    "lint": "npx eslint src --ext .ts,.tsx --fix",
+    "prepublishOnly": "npm run build",
+    "prepare": "npm run build"
+  },
+  "dependencies": {
+    "@types/node": "^12.0.0",
+    "@types/react": "^17.0.0",
+    "typescript": "^4.1.2"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^17.5.0",
+    "@commitlint/config-conventional": "^17.4.4",
+    "husky": "^8.0.3",
+    "@typescript-eslint/eslint-plugin": "^5.57.0",
+    "@typescript-eslint/parser": "^5.57.0",
+    "eslint": "^8.18.0",
+    "@babel/cli": "^7.12.10",
+    "@babel/core": "^7.12.10",
+    "@babel/preset-env": "^7.12.11",
+    "@babel/preset-react": "^7.12.10",
+    "npm-run-all": "^4.1.5",
+    "resize-observer-polyfill": "^1.5.1",
+    "rollup": "^2.35.1",
+    "rollup-plugin-delete": "^2.0.0",
+    "rollup-plugin-node-resolve": "^5.2.0",
+    "rollup-plugin-peer-deps-external": "^2.2.4",
+    "rollup-plugin-typescript2": "^0.30.0",
+    "tslib": "^2.2.0"
+  },
+  "peerDependencies": {
+    "react": "^16.8.0 || ^17.0.0 || ^18.0.0"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
   "keywords": [
     "hooks",
     "react",
@@ -20,54 +77,5 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/reactivers/use-socket"
-  },
-  "main": "dist/index.cjs.js",
-  "types": "dist/types/index.d.ts",
-  "source": "src/index.ts",
-  "dependencies": {
-    "@types/node": "^12.0.0",
-    "@types/react": "^17.0.0",
-    "typescript": "^4.1.2"
-  },
-  "scripts": {
-    "build": "rollup -c",
-    "build-watch": "rollup -c -w",
-    "dev": "npm-run-all --parallel build-watch",
-    "prepublishOnly": "npm run build",
-    "prepare": "npm run build"
-  },
-  "devDependencies": {
-    "@babel/cli": "^7.12.10",
-    "@babel/core": "^7.12.10",
-    "@babel/preset-env": "^7.12.11",
-    "@babel/preset-react": "^7.12.10",
-    "npm-run-all": "^4.1.5",
-    "resize-observer-polyfill": "^1.5.1",
-    "rollup": "^2.35.1",
-    "rollup-plugin-delete": "^2.0.0",
-    "rollup-plugin-node-resolve": "^5.2.0",
-    "rollup-plugin-peer-deps-external": "^2.2.4",
-    "rollup-plugin-typescript2": "^0.30.0",
-    "tslib": "^2.2.0"
-  },
-  "peerDependencies": {
-    "react": "^16.8.0 || ^17.0.0 || ^18.0.0"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app"
-    ]
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
   }
 }
