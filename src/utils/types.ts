@@ -38,7 +38,7 @@ export interface SocketState<T extends ISocketJSONType> {
 
 export interface SocketResponse<T extends ISocketJSONType>
   extends SocketState<T> {
-  connect: (params: IConnect<T>) => WebSocket;
+  connect: (params?: IConnect<T>) => WebSocket;
   socket: WebSocket;
   sendData: (data: T) => void;
 }
